@@ -46,8 +46,7 @@ def build_weather_query(city_input):
     api_key = _get_api_key()
     city_name = " ".join(city_input)
     url_encoded_city_name = parse.quote_plus(city_name)  # encodes the string to make a valid HTTP request to the API
-    url = (f"{BASE_WEATHER_API_URL}?q={url_encoded_city_name}"
-           f"&appid={api_key}")
+    url = f"{BASE_WEATHER_API_URL}?q={url_encoded_city_name}&APPID={api_key}"
     return url
 
 
@@ -90,7 +89,7 @@ def display_weather_info(weather_data):
 
     style.change_color(style.RESET)
     print(f"\t{weather_symbol}", end=" ")
-    print(f"({'No storm today! :p' if weather_id not in THUNDERSTORM else 'Brace yourself today! :c'})")
+    print(f"({'No thunderstorm today! 🥳' if weather_id not in THUNDERSTORM else 'Brace yourself today! 😥'})")
 
 
 def _select_weather_display_params(weather_id):
