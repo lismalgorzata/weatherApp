@@ -97,7 +97,7 @@ def _select_weather_display_params(weather_id):
     if weather_id in THUNDERSTORM:
         display_params = ("🌩️", style.RED)
     elif weather_id not in THUNDERSTORM:
-        display_params = ("✨", style.WHITE)
+        display_params = ("✨", style.YELLOW)
     else:  # In case the API adds new weather codes
         display_params = ("🌈", style.RESET)
     return display_params
