@@ -10,6 +10,12 @@ BASE_WEATHER_API_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 # Weather Condition Code
 THUNDERSTORM = range(200, 300)
+DRIZZLE = range(300, 400)
+RAIN = range(500, 600)
+SNOW = range(600, 700)
+ATMOSPHERE = range(700, 800)
+CLEAR = range(800, 801)
+CLOUDY = range(801, 900)
 
 
 # get access to API key
@@ -40,13 +46,18 @@ def read_user_cli_args():
 
 
 # Build the URL
-def build_weather_query(city_input):
+def build_weather_query(city_input, imperial=False):
     """Builds the URL for an API request to OpenWeather's weather API"""
     # city_input is the list of strings collected in user_args.city
     api_key = _get_api_key()
     city_name = " ".join(city_input)
     url_encoded_city_name = parse.quote_plus(city_name)  # encodes the string to make a valid HTTP request to the API
-    url = f"{BASE_WEATHER_API_URL}?q={url_encoded_city_name}&APPID={api_key}"
+    if imperial:
+        units = "imperial"
+    else:
+        units = "metric"
+
+    url = f"{BASE_WEATHER_API_URL}?q={url_encoded_city_name}&units={units}&appid={api_key}"
     return url
 
 
@@ -73,38 +84,57 @@ def get_weather_data(query_url):
         sys.exit("Couldn't read the server response.")
 
 
-def display_weather_info(weather_data):
+def display_weather_info(weather_data, imperial=False):
     """Prints formatted weather information about a city"""
 
     city = weather_data["name"]
     weather_id = weather_data["weather"][0]["id"]
+    weather_description = weather_data["weather"][0]["description"]
+    temperature = weather_data["main"]["temp"]
 
     style.change_color(style.REVERSE)
     print(f"{city:^{style.PADDING}}", end="")
     style.change_color(style.RESET)
 
-    weather_symbol, color = _select_weather_display_params(weather_id)
+    color = _select_weather_display_params(weather_id)
 
     style.change_color(color)
-
+    print(f"\t{weather_description.capitalize():^{style.PADDING}}", end=" ")
     style.change_color(style.RESET)
-    print(f"\t{weather_symbol}", end=" ")
-    print(f"({'No thunderstorm today! 🥳' if weather_id not in THUNDERSTORM else 'Brace yourself today! 😥'})")
+
+    if temperature != 1:
+        print(f"{temperature} degrees {'Fahrenheit' if imperial else 'Celsius'} ")
+    else:
+        print(f"1 degree{'Fahrenheit' if imperial else 'Celsius'} ")
 
 
 def _select_weather_display_params(weather_id):
     if weather_id in THUNDERSTORM:
-        display_params = ("🌩️", style.RED)
-    elif weather_id not in THUNDERSTORM:
-        display_params = ("✨", style.YELLOW)
+        color = style.RED
+    elif weather_id in DRIZZLE:
+        color = style.CYAN
+    elif weather_id in RAIN:
+        color = style.BLUE
+    elif weather_id in SNOW:
+        color = style.WHITE
+    elif weather_id in ATMOSPHERE:
+        color = style.GREEN
+    elif weather_id in CLEAR:
+        color = style.YELLOW
+    elif weather_id in CLOUDY:
+        color = style.WHITE
     else:  # In case the API adds new weather codes
-        display_params = ("🌈", style.RESET)
-    return display_params
+        color = style.RESET
+    return color
 
 
 if __name__ == "__main__":
-    print('THUNDERSTORM CHECKER')
+    print(f"\t\t\t{'CHECK YOUR WEATHER'}")
     user_args = read_user_cli_args()
     query_url = build_weather_query(user_args.city)
     weather_data = get_weather_data(query_url)
     display_weather_info(weather_data)
+
+
+
+
